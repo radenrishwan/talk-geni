@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:gemini_chat/api.dart';
 import 'package:gemini_chat/model/model.dart';
+import 'package:gemini_chat/screen/model_setting_screen.dart';
 import 'package:gemini_chat/widget/message_body.dart';
 import 'package:gemini_chat/widget/pop_up_menu_widget.dart';
 import 'package:gemini_chat/widget/send_button.dart';
@@ -22,6 +23,9 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final modelInstructionController = TextEditingController();
+  final stopSequenceController = TextEditingController();
+
   final apiKey = ValueNotifier('');
   final isApiKeyLoading = ValueNotifier(false);
   final listChat = ValueNotifier(<Content>[]);
@@ -30,6 +34,13 @@ class _ChatScreenState extends State<ChatScreen> {
   final scrollController = ScrollController();
   final textController = TextEditingController();
 
+  final isLoadSetting = ValueNotifier(false);
+  final temperatureValue = ValueNotifier(0.5);
+  final harassmentValue = ValueNotifier(0.5);
+  final hateSpeechValue = ValueNotifier(0.5);
+  final sexualityExplicitValue = ValueNotifier(0.5);
+  final dangerousContentValue = ValueNotifier(0.5);
+
   @override
   void initState() {
     isApiKeyLoading.value = true;
@@ -37,6 +48,24 @@ class _ChatScreenState extends State<ChatScreen> {
       final apiKey = value.getString('api_key') ?? '';
 
       this.apiKey.value = apiKey;
+
+      // setting up the model
+      modelInstructionController.text =
+          value.getString(ModelSettingStatic.modelInstructionKey) ?? '';
+      stopSequenceController.text =
+          value.getString(ModelSettingStatic.stopSequenceKey) ?? '';
+
+      temperatureValue.value =
+          value.getDouble(ModelSettingStatic.temperatureKey) ?? 0.9;
+      harassmentValue.value =
+          value.getDouble(ModelSettingStatic.harassmentKey) ?? 0.5;
+      hateSpeechValue.value =
+          value.getDouble(ModelSettingStatic.hateSpeechKey) ?? 0.5;
+      sexualityExplicitValue.value =
+          value.getDouble(ModelSettingStatic.sexualityExplicitKey) ?? 0.5;
+      dangerousContentValue.value =
+          value.getDouble(ModelSettingStatic.dangerousContentKey) ?? 0.5;
+
       isApiKeyLoading.value = false;
     });
 
@@ -50,7 +79,18 @@ class _ChatScreenState extends State<ChatScreen> {
         title: const Text('Chat with Gemini AI'),
         centerTitle: true,
         actions: [
-          PopUpMenuWidget(listChat, apiKey),
+          PopUpMenuWidget(
+            listChat,
+            apiKey,
+            modelInstructionController: modelInstructionController,
+            stopSequenceController: stopSequenceController,
+            isLoadSetting: isLoadSetting,
+            temperatureValue: temperatureValue,
+            harassmentValue: harassmentValue,
+            hateSpeechValue: hateSpeechValue,
+            sexualityExplicitValue: sexualityExplicitValue,
+            dangerousContentValue: dangerousContentValue,
+          ),
         ],
       ),
       body: ListenableBuilder(

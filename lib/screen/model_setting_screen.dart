@@ -13,41 +13,52 @@ class ModelSettingStatic {
 }
 
 class ModelSettingScreen extends StatefulWidget {
-  const ModelSettingScreen({super.key});
+  final TextEditingController modelInstructionController;
+  final TextEditingController stopSequenceController;
+  final ValueNotifier isLoadSetting;
+  final ValueNotifier<double> temperatureValue;
+  final ValueNotifier<double> harassmentValue;
+  final ValueNotifier<double> hateSpeechValue;
+  final ValueNotifier<double> sexualityExplicitValue;
+  final ValueNotifier<double> dangerousContentValue;
+
+  const ModelSettingScreen({
+    super.key,
+    required this.modelInstructionController,
+    required this.stopSequenceController,
+    required this.isLoadSetting,
+    required this.temperatureValue,
+    required this.harassmentValue,
+    required this.hateSpeechValue,
+    required this.sexualityExplicitValue,
+    required this.dangerousContentValue,
+  });
 
   @override
   State<ModelSettingScreen> createState() => _ModelSettingScreenState();
 }
 
 class _ModelSettingScreenState extends State<ModelSettingScreen> {
-  final modelInstructionController = TextEditingController();
-  final stopSequenceController = TextEditingController();
-
   final ValueNotifier isLoadSetting = ValueNotifier(false);
-  final ValueNotifier<double> temperatureValue = ValueNotifier(0.5);
-  final ValueNotifier<double> harassmentValue = ValueNotifier(0.5);
-  final ValueNotifier<double> hateSpeechValue = ValueNotifier(0.5);
-  final ValueNotifier<double> sexualityExplicitValue = ValueNotifier(0.5);
-  final ValueNotifier<double> dangerousContentValue = ValueNotifier(0.5);
 
   @override
   void initState() {
     isLoadSetting.value = true;
     SharedPreferences.getInstance().then((value) {
-      modelInstructionController.text =
+      widget.modelInstructionController.text =
           value.getString(ModelSettingStatic.modelInstructionKey) ?? '';
-      stopSequenceController.text =
+      widget.stopSequenceController.text =
           value.getString(ModelSettingStatic.stopSequenceKey) ?? '';
 
-      temperatureValue.value =
+      widget.temperatureValue.value =
           value.getDouble(ModelSettingStatic.temperatureKey) ?? 0.9;
-      harassmentValue.value =
+      widget.harassmentValue.value =
           value.getDouble(ModelSettingStatic.harassmentKey) ?? 0.5;
-      hateSpeechValue.value =
+      widget.hateSpeechValue.value =
           value.getDouble(ModelSettingStatic.hateSpeechKey) ?? 0.5;
-      sexualityExplicitValue.value =
+      widget.sexualityExplicitValue.value =
           value.getDouble(ModelSettingStatic.sexualityExplicitKey) ?? 0.5;
-      dangerousContentValue.value =
+      widget.dangerousContentValue.value =
           value.getDouble(ModelSettingStatic.dangerousContentKey) ?? 0.5;
 
       isLoadSetting.value = false;
@@ -64,6 +75,31 @@ class _ModelSettingScreenState extends State<ModelSettingScreen> {
       appBar: AppBar(
         title: const Text('Model Setting'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              // reset the model setting
+              sharedPreferences.then((value) {
+                value.remove(ModelSettingStatic.modelInstructionKey);
+                value.remove(ModelSettingStatic.stopSequenceKey);
+                value.remove(ModelSettingStatic.temperatureKey);
+                value.remove(ModelSettingStatic.harassmentKey);
+                value.remove(ModelSettingStatic.hateSpeechKey);
+                value.remove(ModelSettingStatic.sexualityExplicitKey);
+                value.remove(ModelSettingStatic.dangerousContentKey);
+              });
+
+              widget.modelInstructionController.text = '';
+              widget.stopSequenceController.text = '';
+              widget.temperatureValue.value = 0.9;
+              widget.harassmentValue.value = 0.5;
+              widget.hateSpeechValue.value = 0.5;
+              widget.sexualityExplicitValue.value = 0.5;
+              widget.dangerousContentValue.value = 0.5;
+            },
+            icon: const Icon(Icons.replay_outlined),
+          ),
+        ],
       ),
       body: ListenableBuilder(
         listenable: Listenable.merge([isLoadSetting]),
@@ -90,7 +126,7 @@ class _ModelSettingScreenState extends State<ModelSettingScreen> {
                         icon: const Icon(Icons.info_outline),
                       ),
                       TextField(
-                        controller: modelInstructionController,
+                        controller: widget.modelInstructionController,
                         onChanged: (instruction) {
                           sharedPreferences.then((value) {
                             value.setString(
@@ -117,12 +153,12 @@ class _ModelSettingScreenState extends State<ModelSettingScreen> {
                         icon: const Icon(Icons.thermostat_rounded),
                       ),
                       ValueListenableBuilder(
-                        valueListenable: temperatureValue,
+                        valueListenable: widget.temperatureValue,
                         builder: (context, value, _) {
                           return Slider(
                             value: value,
                             onChanged: (now) {
-                              temperatureValue.value = now;
+                              widget.temperatureValue.value = now;
                               sharedPreferences.then((value) {
                                 value.setDouble(
                                   ModelSettingStatic.temperatureKey,
@@ -139,7 +175,7 @@ class _ModelSettingScreenState extends State<ModelSettingScreen> {
                         icon: const Icon(Icons.stop_circle_outlined),
                       ),
                       TextField(
-                        controller: stopSequenceController,
+                        controller: widget.stopSequenceController,
                         onChanged: (sequence) {
                           sharedPreferences.then((value) {
                             value.setString(
@@ -166,48 +202,48 @@ class _ModelSettingScreenState extends State<ModelSettingScreen> {
                       ),
                       buildSafetySetting(
                         title: 'Harassment',
-                        value: harassmentValue,
+                        value: widget.harassmentValue,
                         onChanged: () {
                           sharedPreferences.then((value) {
                             value.setDouble(
                               ModelSettingStatic.harassmentKey,
-                              harassmentValue.value,
+                              widget.harassmentValue.value,
                             );
                           });
                         },
                       ),
                       buildSafetySetting(
                         title: 'Hate Speech',
-                        value: hateSpeechValue,
+                        value: widget.hateSpeechValue,
                         onChanged: () {
                           sharedPreferences.then((value) {
                             value.setDouble(
                               ModelSettingStatic.hateSpeechKey,
-                              hateSpeechValue.value,
+                              widget.hateSpeechValue.value,
                             );
                           });
                         },
                       ),
                       buildSafetySetting(
                         title: 'Sexuality Explicit',
-                        value: sexualityExplicitValue,
+                        value: widget.sexualityExplicitValue,
                         onChanged: () {
                           sharedPreferences.then((value) {
                             value.setDouble(
                               ModelSettingStatic.sexualityExplicitKey,
-                              sexualityExplicitValue.value,
+                              widget.sexualityExplicitValue.value,
                             );
                           });
                         },
                       ),
                       buildSafetySetting(
                         title: 'Dangerous Content',
-                        value: dangerousContentValue,
+                        value: widget.dangerousContentValue,
                         onChanged: () {
                           sharedPreferences.then((value) {
                             value.setDouble(
                               ModelSettingStatic.dangerousContentKey,
-                              dangerousContentValue.value,
+                              widget.dangerousContentValue.value,
                             );
                           });
                         },

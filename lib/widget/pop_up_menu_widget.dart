@@ -13,8 +13,28 @@ enum PopUpValue {
 class PopUpMenuWidget extends StatelessWidget {
   final ValueNotifier<String> apiKey;
   final ValueNotifier<List<Content>> listChat;
+  final TextEditingController modelInstructionController;
+  final TextEditingController stopSequenceController;
+  final ValueNotifier isLoadSetting;
+  final ValueNotifier<double> temperatureValue;
+  final ValueNotifier<double> harassmentValue;
+  final ValueNotifier<double> hateSpeechValue;
+  final ValueNotifier<double> sexualityExplicitValue;
+  final ValueNotifier<double> dangerousContentValue;
 
-  const PopUpMenuWidget(this.listChat, this.apiKey, {super.key});
+  const PopUpMenuWidget(
+    this.listChat,
+    this.apiKey, {
+    super.key,
+    required this.modelInstructionController,
+    required this.stopSequenceController,
+    required this.isLoadSetting,
+    required this.temperatureValue,
+    required this.harassmentValue,
+    required this.hateSpeechValue,
+    required this.sexualityExplicitValue,
+    required this.dangerousContentValue,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +85,16 @@ class PopUpMenuWidget extends StatelessWidget {
             break;
           case PopUpValue.setModelConfig:
             Navigator.push(context, MaterialPageRoute(builder: (_) {
-              return const ModelSettingScreen();
+              return ModelSettingScreen(
+                modelInstructionController: modelInstructionController,
+                stopSequenceController: stopSequenceController,
+                isLoadSetting: isLoadSetting,
+                temperatureValue: temperatureValue,
+                harassmentValue: harassmentValue,
+                hateSpeechValue: hateSpeechValue,
+                sexualityExplicitValue: sexualityExplicitValue,
+                dangerousContentValue: dangerousContentValue,
+              );
             }));
             break;
           case PopUpValue.clearConversation:
