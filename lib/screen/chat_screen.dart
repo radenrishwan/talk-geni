@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:gemini_chat/api.dart';
@@ -11,6 +12,7 @@ import 'package:gemini_chat/widget/message_body.dart';
 import 'package:gemini_chat/widget/pop_up_menu_widget.dart';
 import 'package:gemini_chat/widget/send_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -61,8 +63,36 @@ class _ChatScreenState extends State<ChatScreen> {
           }
 
           if (apiKey.value == '') {
-            return const Center(
-              child: Text('Please set your API Key on top right'),
+            return Center(
+              child: RichText(
+                text: TextSpan(children: [
+                  const TextSpan(
+                    text: 'Please set your API Key on top right\n',
+                    style: TextStyle(
+                      color: Colors.black,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'you can click here to get API Key',
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () async {
+                        if (!await launchUrl(Uri.parse(
+                            'https://makersuite.google.com/app/apikey'))) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Failed to open url'),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    style: const TextStyle(
+                      color: Colors.blue,
+                    ),
+                  ),
+                ]),
+              ),
             );
           }
 
@@ -73,22 +103,6 @@ class _ChatScreenState extends State<ChatScreen> {
           );
         },
       ),
-      // body: ValueListenableBuilder(
-      //   valueListenable: apiKey,
-      //   builder: (context, value, _) {
-      //     if (value == '') {
-      //       return const Center(
-      //         child: Text('Please set your API Key on top right'),
-      //       );
-      //     }
-
-      //     return MessageBody(
-      //       scrollController: scrollController,
-      //       listChat: listChat,
-      //       // sharedPreferences: future.data!,
-      //     );
-      //   },
-      // ),
       bottomNavigationBar: ValueListenableBuilder(
         valueListenable: apiKey,
         builder: (context, value, _) {

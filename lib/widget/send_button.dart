@@ -90,36 +90,41 @@ class SendButton extends StatelessWidget {
                 icon: const Icon(Icons.attach_file),
               ),
               Expanded(
-                child: TextField(
-                  enabled: !isLoading.value,
-                  controller: textController,
-                  onChanged: (value) {
-                    if (value.isEmpty) {
-                      isEmpty.value = true;
-                    } else {
-                      isEmpty.value = false;
-                    }
-                  },
-                  onSubmitted: (value) {
-                    if (value.isEmpty) {
-                      return;
-                    }
+                child: ValueListenableBuilder(
+                  valueListenable: isLoading,
+                  builder: (context, value, _) {
+                    return TextField(
+                      enabled: !value,
+                      controller: textController,
+                      onChanged: (value) {
+                        if (value.isEmpty) {
+                          isEmpty.value = true;
+                        } else {
+                          isEmpty.value = false;
+                        }
+                      },
+                      onSubmitted: (value) {
+                        if (value.isEmpty) {
+                          return;
+                        }
 
-                    onSendMessage.call();
-                  },
-                  textInputAction: TextInputAction.send,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(8.0),
+                        onSendMessage.call();
+                      },
+                      textInputAction: TextInputAction.send,
+                      keyboardType: TextInputType.text,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8.0),
+                          ),
+                          borderSide: BorderSide.none,
+                        ),
+                        labelText: 'Type message here',
                       ),
-                      borderSide: BorderSide.none,
-                    ),
-                    labelText: 'Type message here',
-                  ),
-                  maxLines: 3,
-                  minLines: 1,
+                      maxLines: 3,
+                      minLines: 1,
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: 8.0),

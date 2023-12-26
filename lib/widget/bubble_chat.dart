@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_highlighter/flutter_highlighter.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:gemini_chat/model/model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:url_launcher/url_launcher.dart';
 
 class SyntaxHighligtherBuilder extends MarkdownElementBuilder {
   @override
@@ -28,6 +30,40 @@ class SyntaxHighligtherBuilder extends MarkdownElementBuilder {
         theme: atomOneLightTheme,
         textStyle: GoogleFonts.jetBrainsMono(),
         padding: const EdgeInsets.all(4),
+      ),
+    );
+  }
+}
+
+class UrlBuilder extends MarkdownElementBuilder {
+  final BuildContext context;
+
+  UrlBuilder(this.context);
+
+  @override
+  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+    return InkWell(
+      onTap: () async {
+        final url = element.attributes['href'];
+        try {
+          if (!await launchUrl(Uri.parse(url ?? ''))) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Cannot open $url',
+                  ),
+                ),
+              );
+            }
+          }
+        } catch (e) {
+          log(e.toString());
+        }
+      },
+      child: Text(
+        element.textContent.trim(),
+        style: preferredStyle,
       ),
     );
   }
@@ -63,12 +99,14 @@ class BubbleChat extends StatelessWidget {
             ),
           ),
           Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.8,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xff61b095),
               borderRadius: BorderRadius.circular(8.0),
             ),
             padding: const EdgeInsets.all(8.0),
-            width: MediaQuery.of(context).size.width * 0.8,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -127,6 +165,7 @@ class BubbleChat extends StatelessWidget {
                   ),
                   builders: {
                     'code': SyntaxHighligtherBuilder(),
+                    'a': UrlBuilder(context),
                   },
                   shrinkWrap: true,
                   selectable: true,
